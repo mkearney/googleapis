@@ -2,6 +2,7 @@
 % Please edit documentation in R/analyze_sentiment.R
 \name{analyze_sentiment}
 \alias{analyze_sentiment}
+\alias{analyse_sentiment}
 \title{analyze_sentiment}
 \usage{
 analyze_sentiment(data)

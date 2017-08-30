@@ -3,10 +3,9 @@ devtools::load_all()
 devtools::document()
 
 ## fetch text to analyze
-rt <- rtweet::search_tweets("trump is the worst president", include_rts = FALSE)
-text <- rt$text[1:5]
+rt <- rtweet::search_tweets("lang:en", include_rts = FALSE)
 
 ## sentiment analysis
-x <- analyze_sentiment(text)
-x
-
+df <- analyze_sentiment(rt$text)
+as.data.frame(df)
+tibble::as_tibble(df)
