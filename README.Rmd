@@ -19,7 +19,32 @@ R client for interacting with [Google Cloud Natural Language APIs](https://cloud
 This is a work in progress. To date, this package only interacts with the
 `analyzeSentiment` API. If this project interests you, please let me know.
 
-### install
+### Getting started with Google SDK
+
+Google's [documentation is fantastic](https://cloud.google.com/natural-language/docs/getting-started). 
+Click the link below for a quick start guide.
+
+- https://cloud.google.com/natural-language/docs/getting-started
+
+Before you can use Google's NLP APIs, you'll need an API key. For that, I
+recommend following the quick start guide linked above. It'll basically go
+something like this:
+
+1. Setup your Google software development account (***Using the API is free up
+to a point, but you should be able to get a $300.00 credit for signing up as
+well***). You may also need to "enable billing," but I promise that doesn't mean
+you're sinking any money into this thing--they clearly are trying to sell you on
+how awesome it is rather than tricking you into forking over cash.
+2. Enable the Natural Language API. There should be an option to "create
+credentials." For use in interactive R sessions, you'll just need an API key (a
+long string of text), which you should be able to get using the defaults
+provided by Google.
+
+The first time you use any of the functions from the googleapis package, you'll
+be asked for your API key. It'll be set as an environment variable and saved for
+future sessions, so you should only have to do this once (per machine).
+
+### install package
 
 Install `googleapis` using the [devtools](https://github.com/hadley/devtools)
 package.

@@ -6,7 +6,20 @@ R client for interacting with [Google Cloud Natural Language APIs](https://cloud
 
 This is a work in progress. To date, this package only interacts with the `analyzeSentiment` API. If this project interests you, please let me know.
 
-### install
+### Getting started with Google SDK
+
+Google's [documentation is fantastic](https://cloud.google.com/natural-language/docs/getting-started). Click the link below for a quick start guide.
+
+-   <https://cloud.google.com/natural-language/docs/getting-started>
+
+Before you can use Google's NLP APIs, you'll need an API key. For that, I recommend following the quick start guide linked above. It'll basically go something like this:
+
+1.  Setup your Google software development account (***Using the API is free up to a point, but you should be able to get a $300.00 credit for signing up as well***). You may also need to "enable billing," but I promise that doesn't mean you're sinking any money into this thing--they clearly are trying to sell you on how awesome it is rather than tricking you into forking over cash.
+2.  Enable the Natural Language API. There should be an option to "create credentials." For use in interactive R sessions, you'll just need an API key (a long string of text), which you should be able to get using the defaults provided by Google.
+
+The first time you use any of the functions from the googleapis package, you'll be asked for your API key. It'll be set as an environment variable and saved for future sessions, so you should only have to do this once (per machine).
+
+### install package
 
 Install `googleapis` using the [devtools](https://github.com/hadley/devtools) package.
 
@@ -98,16 +111,16 @@ tibble::as_tibble(sa)
     ## # A tibble: 154 x 6
     ##          id document sentence offset score
     ##       <chr>    <dbl>    <int>  <int> <dbl>
-    ##  1 WjDuKF1N      0.0        1      0   0.0
-    ##  2 WjDuKF1N      0.0        2      8  -0.1
-    ##  3 fMgwPX11     -0.2        1      0  -0.2
-    ##  4 13OZkE0q     -0.1        1      0  -0.1
-    ##  5 t0kuyOwZ      0.2        1      0   0.3
-    ##  6 t0kuyOwZ      0.2        2     69   0.1
-    ##  7 AIF5N9Y1     -0.1        1      0  -0.1
-    ##  8 D8LHBAEK     -0.1        1      0  -0.1
-    ##  9 dIuu28HA     -0.4        1      0  -0.3
-    ## 10 dIuu28HA     -0.4        2     83  -0.5
+    ##  1 b9VrlU8Z      0.0        1      0   0.0
+    ##  2 b9VrlU8Z      0.0        2      8  -0.1
+    ##  3 isnYeUGN     -0.2        1      0  -0.2
+    ##  4 jaz5GWJ0     -0.1        1      0  -0.1
+    ##  5 t354oUkD      0.2        1      0   0.3
+    ##  6 t354oUkD      0.2        2     69   0.1
+    ##  7 uZSrGOxB     -0.1        1      0  -0.1
+    ##  8 9MTGAmyg     -0.1        1      0  -0.1
+    ##  9 LtKT33G9     -0.4        1      0  -0.3
+    ## 10 LtKT33G9     -0.4        2     83  -0.5
     ## # ... with 144 more rows, and 1 more variables: content <chr>
 
 Each row in the converted data frame represents one sentence of the provided text. For each observation, there are six features (variables):
