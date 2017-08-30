@@ -1,30 +1,45 @@
 
 #' analyze_sentiment
 #'
-#' Returns sentiment analyzis from Google cloud language API.
+#' Conducts and returns results of sentiment analysis using Google Cloud Natural
+#'   Language API.
 #'
-#' @param data Vector of plain text to analyze.
+#' @param text Vector of plain text to analyze.
 #' @return List of parsed response objects.
 #' @export
 #' @aliases analyse_sentiment
-analyze_sentiment <- function(data) {
-  eval(call("analyze_sentiment_", data))
+analyze_sentiment <- function(text, id = NULL) {
+  eval(call("analyze_sentiment_", text))
 }
 
-analyze_sentiment_ <- function(text) {
+analyze_sentiment_ <- function(text, id = NULL) {
   analyze_sentiment_internal <- function(text) {
     ## API path
     path <- "analyzeSentiment"
     ## format text for request
-    text <- jsonify_text(text)
+    jstext <- jsonify_text(text)
     ## execute request
-    r <- httr::POST(api_call(path), body = text)
+    r <- httr::POST(api_call(path), body = jstext)
     ## parse
     r <- parse_docs(r)
-    class(r) <- c("sentiment_analysis", "list")
-    r
+    structure(
+      .Data = r,
+      class = c("sentiment_analysis", "list"),
+      text = text,
+      id = id
+    )
+    ##class(r) <- c("sentiment_analysis", "list")
+    ##r
   }
-  out <- lapply(text, analyze_sentiment_internal)
+  if (!is.null(id)) {
+    stopifnot(length(text) == length(id))
+    out <- Map(analyze_sentiment_internal, text, id)
+  } else {
+    out <- Map(analyze_sentiment_internal, text)
+    for (i in seq_along(out)) {
+      attr(out[[i]], "id") <- i
+    }
+  }
   class(out) <- c("sentiment_analysis_list", "list")
   out
 }
@@ -41,24 +56,47 @@ as.data.frame.sentiment_analysis <- function(x) {
   if (!has_name(x, "documentSentiment", "sentences")) {
     return(data.frame())
   }
-  document <- x$documentSentiment[["score"]]
+  doc_score <- x$documentSentiment[["score"]]
+  doc_magnitude <- x$documentSentiment[["magnitude"]]
   content <- get_var(x$sentences, "text", "content")
   offset <- get_var(x$sentences, "text", "beginOffset")
   score <- get_var(x$sentences, "sentiment", "score")
-  if (!all.equal(length(content), length(offset), length(score))) {
+  magnitude <- get_var(x$sentences, "sentiment", "score")
+  id <- attr(x, "id")
+  text <- attr(x, "text")
+  lns <- c(
+    length(content),
+    length(offset),
+    length(score),
+    length(magnitude)
+  )
+  if (!all.equal(lns[1], lns[2], lns[3], lns[4])) {
     content <- content[1]
     offset <- offset[1]
     score <- score[1]
+    magnitude <- magnitude[1]
   }
-  data.frame(
-    id = make_ids(1),
-    document = document,
-    sentence = seq_along(content),
-    offset = offset,
+  docs <- data.frame(
+    id = id,
+    unit = "document",
+    score = doc_score,
+    magnitude = doc_magnitude,
+    position = NA_integer_,
+    offset = NA_integer_,
+    content = text,
+    stringsAsFactors = FALSE
+  )
+  sents <- data.frame(
+    id = id,
+    unit = "sentence",
     score = score,
+    magnitude = magnitude,
+    position = seq_along(content),
+    offset = offset,
     content = content,
     stringsAsFactors = FALSE
   )
+  rbind(docs, sents)
 }
 
 #' @export
@@ -84,14 +122,6 @@ as_tibble.sentiment_analysis <- function(data) {
   tibble::as_tibble(data, validate = FALSE)
 }
 
-parse_docs <- function(x, simplify = FALSE) {
-  if (simplify) {
-    jsonlite::fromJSON(
-      httr::content(x, as = "text", encoding = "UTF-8"))
-  } else {
-    httr::content(x)
-  }
-}
 
 jsonify_text <- function(text) {
   lst <- list(

@@ -120,77 +120,57 @@ sa <- tibble::as_tibble(sa)
 sa
 ```
 
-    ## # A tibble: 1,549 x 6
-    ##          id document sentence offset score
-    ##       <chr>    <dbl>    <int>  <int> <dbl>
-    ##  1 PCzd5zxx      0.0        1      0   0.4
-    ##  2 PCzd5zxx      0.0        2     34  -0.4
-    ##  3 f3dh0G7h      0.0        1      0   0.0
-    ##  4 7ZWu7M2x     -0.1        1      0  -0.1
-    ##  5 XD0kaZ29     -0.6        1      0  -0.6
-    ##  6 4Zi9YIJ9      0.0        1      0   0.0
-    ##  7 4Zi9YIJ9      0.0        2     53  -0.1
-    ##  8 YMfPgN1P      0.0        1      0   0.1
-    ##  9 YMfPgN1P      0.0        2      6   0.0
-    ## 10 YMfPgN1P      0.0        3     27   0.0
-    ## # ... with 1,539 more rows, and 1 more variables: content <chr>
+    ## # A tibble: 2,548 x 7
+    ##       id     unit score magnitude position offset
+    ##  * <int>    <chr> <dbl>     <dbl>    <int>  <int>
+    ##  1     1 document   0.0       0.9       NA     NA
+    ##  2     1 sentence   0.4       0.4        1      0
+    ##  3     1 sentence  -0.4      -0.4        2     34
+    ##  4     2 document   0.0       0.0       NA     NA
+    ##  5     2 sentence   0.0       0.0        1      0
+    ##  6     3 document  -0.1       0.1       NA     NA
+    ##  7     3 sentence  -0.1      -0.1        1      0
+    ##  8     4 document  -0.6       0.6       NA     NA
+    ##  9     4 sentence  -0.6      -0.6        1      0
+    ## 10     5 document   0.0       0.1       NA     NA
+    ## # ... with 2,538 more rows, and 1 more variables: content <chr>
 
-Each row in the converted data frame represents one sentence of the provided text. For each observation, there are six features (variables):
+Each row in the converted data frame represents one sentence of the provided text. For each observation, there are seven features (variables):
 
--   `id` Randomly generated ID (assigned to each tweet)
--   `document` Overall sentiment score of the document---in this case, a document is one whole tweet
--   `sentence` The ordinal position of a given sentence as a sequence within a single tweet (e.g., first sentence of a document, second sentence of a document)
--   `offset` The position, in number of characters, from which the sentence started within a document
--   `score` The sentiment (along positive and negative dimensions) score of the sentence
--   `content` The text of the analyzed sentence
+-   `id` ID assigned to each document (in this case, each tweet)
+-   `unit` Unit of analysis, either "document" or "sentence"
+-   `score` The sentiment (along positive and negative dimensions) score of the sentence standardized on a -1.0 to 1.0 scale.
+-   `magnitude` The magnitude of the score (positive, unstandardized)
+-   `position` The ordinal position of a given sentence as a sequence within a single tweet (e.g., first sentence of a document, second sentence of a document)
+-   `offset` The relative position, in number of characters, from which the sentence started within a document
+-   `content` The text that was analyzed (corresponds with unit)
 
 Explore the data using the tidyverse.
 
 ``` r
 ## i subscribe to the tidyverse
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 ```
 
-    ## Loading tidyverse: ggplot2
-    ## Loading tidyverse: tibble
-    ## Loading tidyverse: tidyr
-    ## Loading tidyverse: readr
-    ## Loading tidyverse: purrr
-    ## Loading tidyverse: dplyr
-
-    ## Conflicts with tidy packages ----------------------------------------------
-
-    ## filter(): dplyr, stats
-    ## lag():    dplyr, stats
-
-Histogram of sentences scores
+Histogram of scores faceted by unit
 
 ``` r
 sa %>%
-  ggplot(aes(score)) +
-  geom_histogram(binwidth = .1)
+  ggplot(aes(score, fill = unit)) +
+  geom_histogram(binwidth = .1) + 
+  facet_wrap(~ unit)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-16-1.png)
-
-Histogram of document scores
-
-``` r
-sa %>%
-  filter(sentence == 1L) %>%
-  ggplot(aes(document)) +
-  geom_histogram(binwidth = .1)
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-17-1.png)
 
 Box plot for each sentence position number
 
 ``` r
 p <- sa %>%
-  mutate(sentence = factor(sentence)) %>%
+  filter(unit == "sentence") %>%
+  mutate(position = factor(position)) %>%
   ggplot(
-    aes(x = sentence, y = score, colour = sentence, fill = sentence)
+    aes(x = position, y = score, colour = position, fill = position)
   ) +
   geom_boxplot(outlier.shape = NA, alpha = .7) + 
   geom_jitter(alpha = .4, shape = 21) + 

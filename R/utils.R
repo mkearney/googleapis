@@ -1,5 +1,4 @@
-any_recursive <- function(x) any(vapply(x, is.recursive, logical(1)))
-
+## get variable(s) from nested obj
 get_var <- function(x, ...) {
   vars <- c(...)
   success <- FALSE
@@ -25,7 +24,11 @@ get_var <- function(x, ...) {
   unlist(x)
 }
 
+any_recursive <- function(x) {
+  any(vapply(x, is.recursive, logical(1)))
+}
 
+## hase name(s) accepts one or more names (looks for all == TRUE)
 has_name <- function(x, ...) {
   vars <- c(...)
   stopifnot(is.character(vars))
@@ -35,18 +38,24 @@ has_name <- function(x, ...) {
   all(vars %in% names(x))
 }
 
-
+## question and answer (choices) for interactive sessions
 menuline <- function(q, a) {
   message(q)
   menu(a)
 }
 
+## accept line broken chr vector and remove user provided quotes
+## for interactive sessions
 readline_ <- function(...) {
   input <- readline(paste(c(...), collapse = ""))
-  gsub("^\"|\"$", "", input)
+  gsub("^\"|^\'|\"$|\'$", "", input)
 }
 
+## make sure last line of R environment file has been filled
 check_renv <- function(path) {
+  if (!file.exists(path)) {
+    return(invisible())
+  }
   con <- file(path)
   x <- readLines(con, warn = FALSE)
   close(con)
@@ -55,15 +64,27 @@ check_renv <- function(path) {
   invisible()
 }
 
-make_ids <- function(n) {
-  f <- function() {
-    ids <- sample(c(letters, toupper(letters), 0:9, 0:9), 8, replace = TRUE)
-    paste(ids, collapse = "")
+## parse method defaults to parsing individual docs
+parse_docs <- function(x, simplify = FALSE) {
+  if (simplify) {
+    jsonlite::fromJSON(
+      httr::content(x, as = "text", encoding = "UTF-8"))
+  } else {
+    httr::content(x)
   }
-  ids <- unique(unlist(replicate(n, f(), simplify = FALSE)))
-  if (length(ids) < n) {
-    ids <- unique(unlist(replicate(f, n + 5L, simplify = FALSE)))
-    ids <- sample(ids, n)
-  }
-  ids
+}
+
+## prep text
+#' @export
+#' @noRd
+prep_text <- function(x) {
+  x <- gsub(
+    "@\\S{1,}|http\\S{1,}|\\n", "", x
+  )
+  x <- gsub(
+    "^\\.\\S{0,}", "", x
+  )
+  trimws(gsub(
+    "[ ]{2,}", " ", x
+  ))
 }

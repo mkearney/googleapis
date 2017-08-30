@@ -150,46 +150,40 @@ sa <- tibble::as_tibble(sa)
 sa
 ```
 
-Each row in the converted data frame represents one sentence of the provided text. For each observation, there are six features (variables):
+Each row in the converted data frame represents one sentence of the provided text. For each observation, there are seven features (variables):
 
-- `id` Randomly generated ID (assigned to each tweet)
-- `document` Overall sentiment score of the document---in this case, a document is one whole tweet
-- `sentence` The ordinal position of a given sentence as a sequence within a single tweet (e.g., first sentence of a document, second sentence of a document)
-- `offset` The position, in number of characters, from which the sentence started within a document
-- `score` The sentiment (along positive and negative dimensions) score of the sentence
-- `content` The text of the analyzed sentence
+- `id` ID assigned to each document (in this case, each tweet)
+- `unit` Unit of analysis, either "document" or "sentence"
+- `score` The sentiment (along positive and negative dimensions) score of the sentence standardized on a -1.0 to 1.0 scale.
+- `magnitude` The magnitude of the score (positive, unstandardized)
+- `position` The ordinal position of a given sentence as a sequence within a single tweet (e.g., first sentence of a document, second sentence of a document)
+- `offset` The relative position, in number of characters, from which the sentence started within a document
+- `content` The text that was analyzed (corresponds with unit)
 
 Explore the data using the tidyverse.
 
 ```{r, eval=TRUE}
 ## i subscribe to the tidyverse
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 ```
 
-Histogram of sentences scores
+Histogram of scores faceted by unit
 
 ```{r, eval=TRUE}
 sa %>%
-  ggplot(aes(score)) +
-  geom_histogram(binwidth = .1)
-```
-
-Histogram of document scores
-
-```{r, eval=TRUE}
-sa %>%
-  filter(sentence == 1L) %>%
-  ggplot(aes(document)) +
-  geom_histogram(binwidth = .1)
+  ggplot(aes(score, fill = unit)) +
+  geom_histogram(binwidth = .1) + 
+  facet_wrap(~ unit)
 ```
 
 Box plot for each sentence position number
 
 ```{r}
 p <- sa %>%
-  mutate(sentence = factor(sentence)) %>%
+  filter(unit == "sentence") %>%
+  mutate(position = factor(position)) %>%
   ggplot(
-    aes(x = sentence, y = score, colour = sentence, fill = sentence)
+    aes(x = position, y = score, colour = position, fill = position)
   ) +
   geom_boxplot(outlier.shape = NA, alpha = .7) + 
   geom_jitter(alpha = .4, shape = 21) + 

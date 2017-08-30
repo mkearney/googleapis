@@ -5,14 +5,15 @@
 \alias{analyse_sentiment}
 \title{analyze_sentiment}
 \usage{
-analyze_sentiment(data)
+analyze_sentiment(text, id = NULL)
 }
 \arguments{
-\item{data}{Vector of plain text to analyze.}
+\item{text}{Vector of plain text to analyze.}
 }
 \value{
 List of parsed response objects.
 }
 \description{
-Returns sentiment analyzis from Google cloud language API.
+Conducts and returns results of sentiment analysis using Google Cloud Natural
+  Language API.
 }
