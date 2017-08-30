@@ -47,10 +47,10 @@ or the [dev version from Github](https://github.com/mkearney/rtweet).
 devtools::install_github("mkearney/rtweet")
 ```
 
-Use `rtweet` to download 100 non-retweeted Twitter statuses about Trump (for best results specify single language).
+Use `rtweet` to download 1,000 non-retweeted Twitter statuses about Trump (for best results specify single language).
 
 ``` r
-trump <- rtweet::search_tweets("Trump lang:en", include_rts = FALSE)
+trump <- rtweet::search_tweets("Trump lang:en", n = 1000, include_rts = FALSE)
 ```
 
 Prep the text by **first** removing URLs, AT (@) mentions, and line breaks
@@ -83,12 +83,12 @@ Here's what the tweets look like for me:
 head(trump_tweets)
 ```
 
-    ## [1] "Warned? Sounds like horror coming Trump is different but didn't need warning ahead of victory"                                           
-    ## [2] "Collusion yes Russian hacking yes Trump lying yes obstruction yes Trump collusion =Treason and Traitor obstruction against the law felon"
-    ## [3] "And had some mysterious creature captured Trump's mouth and made him rant his birtherism tirades whenever he had an audience?"           
-    ## [4] "regardless, the point that she was qualified to be president stands. As does the point that Trump/Breitbart is making journos the enemy" 
-    ## [5] "Chief critical of incitement against press &amp; worrying remarks re: minorities"                                                        
-    ## [6] "Kathy Griffin Says She Ended Her Friendship with Anderson Cooper After He Waited Four Months to Reach Out in the..."
+    ## [1] "It's call respect for human life. We need to quit worshing things and get back to treating people like human beings."
+    ## [2] "Trump bashing again tonight...#MAGA"                                                                                 
+    ## [3] "Unfortunately we don't all get what we need but we get what we don't want.. that's Trump to ya"                      
+    ## [4] "The snub was apparently in protest over the Trump administration's move to cut and delay aid to Egypt."              
+    ## [5] "Blimp (Trump) is the poster child for birth control! He's not even fit too be President of the PTA!"                 
+    ## [6] "Nuts. Mexico always helps. Trump is guilty because he was ass to Mexico."
 
 With the text ready to be analyzed, load `googleapis` if you haven't already.
 
@@ -102,26 +102,38 @@ Conduct sentiment analysis on the character vector of tweets (text) using the `a
 sa <- analyze_sentiment(trump_tweets)
 ```
 
+*Note: replicate this tutorial using the specific data set used here by reading in the R data files as done in the code below:*
+
+``` r
+trump_tweets <- readRDS(
+  "https://github.com/mkearney/googleapis/blob/master/data/text-trumptweets-demo.rds?raw=true"
+)
+sa <- readRDS(
+  "https://github.com/mkearney/googleapis/blob/master/data/sa-trumptweets-demo.rds?raw=true"
+)
+```
+
 The output is a bit messy, but it's easily converted into a tidy data frame using the `as.data.frame` or `as_tibble` functions.
 
 ``` r
-tibble::as_tibble(sa)
+sa <- tibble::as_tibble(sa)
+sa
 ```
 
-    ## # A tibble: 154 x 6
+    ## # A tibble: 1,549 x 6
     ##          id document sentence offset score
     ##       <chr>    <dbl>    <int>  <int> <dbl>
-    ##  1 b9VrlU8Z      0.0        1      0   0.0
-    ##  2 b9VrlU8Z      0.0        2      8  -0.1
-    ##  3 isnYeUGN     -0.2        1      0  -0.2
-    ##  4 jaz5GWJ0     -0.1        1      0  -0.1
-    ##  5 t354oUkD      0.2        1      0   0.3
-    ##  6 t354oUkD      0.2        2     69   0.1
-    ##  7 uZSrGOxB     -0.1        1      0  -0.1
-    ##  8 9MTGAmyg     -0.1        1      0  -0.1
-    ##  9 LtKT33G9     -0.4        1      0  -0.3
-    ## 10 LtKT33G9     -0.4        2     83  -0.5
-    ## # ... with 144 more rows, and 1 more variables: content <chr>
+    ##  1 PCzd5zxx      0.0        1      0   0.4
+    ##  2 PCzd5zxx      0.0        2     34  -0.4
+    ##  3 f3dh0G7h      0.0        1      0   0.0
+    ##  4 7ZWu7M2x     -0.1        1      0  -0.1
+    ##  5 XD0kaZ29     -0.6        1      0  -0.6
+    ##  6 4Zi9YIJ9      0.0        1      0   0.0
+    ##  7 4Zi9YIJ9      0.0        2     53  -0.1
+    ##  8 YMfPgN1P      0.0        1      0   0.1
+    ##  9 YMfPgN1P      0.0        2      6   0.0
+    ## 10 YMfPgN1P      0.0        3     27   0.0
+    ## # ... with 1,539 more rows, and 1 more variables: content <chr>
 
 Each row in the converted data frame represents one sentence of the provided text. For each observation, there are six features (variables):
 
@@ -131,3 +143,75 @@ Each row in the converted data frame represents one sentence of the provided tex
 -   `offset` The position, in number of characters, from which the sentence started within a document
 -   `score` The sentiment (along positive and negative dimensions) score of the sentence
 -   `content` The text of the analyzed sentence
+
+Explore the data using the tidyverse.
+
+``` r
+## i subscribe to the tidyverse
+library(tidyverse)
+```
+
+    ## Loading tidyverse: ggplot2
+    ## Loading tidyverse: tibble
+    ## Loading tidyverse: tidyr
+    ## Loading tidyverse: readr
+    ## Loading tidyverse: purrr
+    ## Loading tidyverse: dplyr
+
+    ## Conflicts with tidy packages ----------------------------------------------
+
+    ## filter(): dplyr, stats
+    ## lag():    dplyr, stats
+
+Histogram of sentences scores
+
+``` r
+sa %>%
+  ggplot(aes(score)) +
+  geom_histogram(binwidth = .1)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-16-1.png)
+
+Histogram of document scores
+
+``` r
+sa %>%
+  filter(sentence == 1L) %>%
+  ggplot(aes(document)) +
+  geom_histogram(binwidth = .1)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-17-1.png)
+
+Box plot for each sentence position number
+
+``` r
+p <- sa %>%
+  mutate(sentence = factor(sentence)) %>%
+  ggplot(
+    aes(x = sentence, y = score, colour = sentence, fill = sentence)
+  ) +
+  geom_boxplot(outlier.shape = NA, alpha = .7) + 
+  geom_jitter(alpha = .4, shape = 21) + 
+  theme(
+    legend.position = "none",
+    text = element_text(family = "Helvetica Neue", colour = "black"),
+    axis.text = element_text(colour = "black"),
+    plot.caption = element_text(size = rel(.8), colour = "#777777"),
+    plot.title = element_text(face = "bold")
+  ) + 
+  labs(
+    title = "Google Cloud sentiment analysis of tweets about Trump",
+    subtitle = "Positive and negative sentiment scores (n = 1,549) broken down by sentence position",
+    x = "Sentence Position", 
+    y = "Sentiment",
+    caption = "\nData collected and analyzed in R using rtweet and googleapis packages\nCode and plot by Michael W. Kearney 2017"
+  )
+
+png("demo_plot.png", 7.5, 5.3, "in", 10, res = 127.5)
+p
+dev.off()
+```
+
+<img src="demo_plot.png"></img>
