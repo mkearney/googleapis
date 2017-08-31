@@ -9,11 +9,17 @@ analyze_sentiment(text, id = NULL)
 }
 \arguments{
 \item{text}{Vector of plain text to analyze.}
+
+\item{id}{Optional, vector of IDs. If provided, length must be equal to
+length of text parameter.}
 }
 \value{
 List of parsed response objects.
 }
 \description{
-Conducts and returns results of sentiment analysis using Google Cloud Natural
-  Language API.
+Conducts and returns results of sentiment analysis using Google Cloud
+  Natural Language API.
+}
+\examples{
+
 }

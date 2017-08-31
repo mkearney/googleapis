@@ -1,15 +1,36 @@
 
+#' inaug45
+#'
+#' Transcript of Trump's 2017 Inaugural Address tokenized by paragraph.
+#'
+#' @docType data
+#' @keywords datasets
+#' @format A character vector consisting of 75 paragraphs.
+#' @source https://www.whitehouse.gov/inaugural-address
+#' @usage inaug45
+NULL
+
 #' analyze_sentiment
 #'
-#' Conducts and returns results of sentiment analysis using Google Cloud Natural
-#'   Language API.
+#' Conducts and returns results of sentiment analysis using Google Cloud
+#'   Natural Language API.
 #'
 #' @param text Vector of plain text to analyze.
+#' @param id Optional, vector of IDs. If provided, length must be equal to
+#'   length of text parameter.
 #' @return List of parsed response objects.
+#' @examples
+#'
 #' @export
 #' @aliases analyse_sentiment
 analyze_sentiment <- function(text, id = NULL) {
-  eval(call("analyze_sentiment_", text))
+  eval(call("analyze_sentiment_", text, id))
+}
+
+#' @export
+#' @noRd
+analyse_sentiment <- function(text, id = NULL) {
+  eval(call("analyze_sentiment_", text, id))
 }
 
 analyze_sentiment_ <- function(text, id = NULL) {
@@ -43,6 +64,10 @@ analyze_sentiment_ <- function(text, id = NULL) {
   class(out) <- c("sentiment_analysis_list", "list")
   out
 }
+print
+print.sentiment_analysis_list <- function(x, ...) {
+
+}
 
 #' sentiment analysis data frame
 #'
@@ -61,7 +86,7 @@ as.data.frame.sentiment_analysis <- function(x) {
   content <- get_var(x$sentences, "text", "content")
   offset <- get_var(x$sentences, "text", "beginOffset")
   score <- get_var(x$sentences, "sentiment", "score")
-  magnitude <- get_var(x$sentences, "sentiment", "score")
+  magnitude <- get_var(x$sentences, "sentiment", "magnitude")
   id <- attr(x, "id")
   text <- attr(x, "text")
   lns <- c(

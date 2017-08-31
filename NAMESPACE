@@ -2,6 +2,7 @@
 
 S3method(as.data.frame,sentiment_analysis)
 S3method(as.data.frame,sentiment_analysis_list)
+export(analyse_sentiment)
 export(analyze_sentiment)
 export(api_call)
 export(as.tibble.sentiment_analysis_list)
