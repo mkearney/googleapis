@@ -7,7 +7,7 @@
 \method{as.data.frame}{sentiment_analysis}(x)
 }
 \arguments{
-\item{data}{Data of class sentiment_analysis}
+\item{x}{Data of class sentiment_analysis}
 }
 \value{
 Data frame
